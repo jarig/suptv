@@ -26,6 +26,8 @@ kotlin {
                 implementation(compose.materialIconsExtended)
                 
                 // AndroidX TV libraries
+                // Note: Using alpha versions as stable TV Compose libraries are not yet available
+                // Track updates at https://developer.android.com/jetpack/androidx/releases/tv
                 implementation("androidx.tv:tv-foundation:1.0.0-alpha10")
                 implementation("androidx.tv:tv-material:1.0.0-alpha10")
                 

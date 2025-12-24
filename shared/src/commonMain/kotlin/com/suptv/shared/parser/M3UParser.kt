@@ -13,6 +13,11 @@ import com.suptv.shared.model.Playlist
  */
 class M3UParser {
     
+    companion object {
+        // Compiled regex pattern for better performance
+        private val ATTR_REGEX = """(\w+(?:-\w+)*)="([^"]*)"""".toRegex()
+    }
+    
     fun parse(content: String, playlistName: String = "M3U Playlist"): Playlist {
         val channels = mutableListOf<Channel>()
         val lines = content.lines()
@@ -56,9 +61,8 @@ class M3UParser {
     private fun parseExtInf(line: String): Map<String, String> {
         val result = mutableMapOf<String, String>()
         
-        // Extract attributes using regex
-        val attrRegex = """(\w+(?:-\w+)*)="([^"]*)"""".toRegex()
-        attrRegex.findAll(line).forEach { match ->
+        // Extract attributes using compiled regex
+        ATTR_REGEX.findAll(line).forEach { match ->
             result[match.groupValues[1]] = match.groupValues[2]
         }
         

@@ -6,6 +6,7 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.Serializable
@@ -17,6 +18,8 @@ import kotlinx.serialization.Serializable
  * Standard endpoints:
  * - /player_api.php?username=X&password=Y&action=get_live_categories
  * - /player_api.php?username=X&password=Y&action=get_live_streams
+ * 
+ * Note: Credentials should be properly encoded when constructing URLs
  */
 class XStreamClient(
     private val baseUrl: String,
@@ -44,13 +47,23 @@ class XStreamClient(
     )
     
     suspend fun getLiveStreams(): Playlist {
-        val url = "$baseUrl/player_api.php?username=$username&password=$password&action=get_live_streams"
+        // Build URL with proper encoding
+        val url = URLBuilder(baseUrl).apply {
+            path("player_api.php")
+            parameters.append("username", username)
+            parameters.append("password", password)
+            parameters.append("action", "get_live_streams")
+        }.buildString()
         
         try {
             val streams: List<XStreamChannel> = client.get(url).body()
             
             val channels = streams.map { stream ->
-                val streamUrl = "$baseUrl/live/$username/$password/${stream.stream_id}.m3u8"
+                // Build stream URL with proper encoding
+                val streamUrl = URLBuilder(baseUrl).apply {
+                    path("live", username, password, "${stream.stream_id}.m3u8")
+                }.buildString()
+                
                 Channel(
                     id = stream.stream_id.toString(),
                     name = stream.name,
@@ -67,6 +80,10 @@ class XStreamClient(
         }
     }
     
+    /**
+     * Close the HTTP client and release resources
+     * Should be called when done with the client
+     */
     fun close() {
         client.close()
     }
