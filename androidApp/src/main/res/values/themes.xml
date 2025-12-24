@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme for Android TV -->
+    <style name="Theme.SupTV" parent="android:Theme.DeviceDefault.NoActionBar">
+        <!-- Customize TV theme here -->
+    </style>
+</resources>
