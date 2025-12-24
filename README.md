@@ -97,6 +97,14 @@ The XStream client (`shared/src/commonMain/.../api/XStreamClient.kt`) provides:
 - [ ] Playback controls and seeking
 - [ ] Multiple playlist management
 
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+For detailed architecture information, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
+For usage examples, see [EXAMPLES.md](EXAMPLES.md).
+
 ## License
 
-TBD
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
