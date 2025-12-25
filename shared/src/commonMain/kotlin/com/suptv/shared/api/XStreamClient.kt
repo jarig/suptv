@@ -51,7 +51,7 @@ class XStreamClient(
         val url = URLBuilder(baseUrl).apply {
             path("player_api.php")
             parameters.append("username", username)
-            parameters.append("password", password)
+            parameters.append("password", password.toString())
             parameters.append("action", "get_live_streams")
         }.buildString()
         
@@ -61,7 +61,7 @@ class XStreamClient(
             val channels = streams.map { stream ->
                 // Build stream URL with proper encoding
                 val streamUrl = URLBuilder(baseUrl).apply {
-                    path("live", username, password, "${stream.stream_id}.m3u8")
+                    path("live", username, password.toString(), "${stream.stream_id}.m3u8")
                 }.buildString()
                 
                 Channel(
