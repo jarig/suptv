@@ -1,0 +1,30 @@
+CREATE TABLE Favorite (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    itemId INTEGER NOT NULL UNIQUE,
+    addedAt INTEGER NOT NULL,
+    FOREIGN KEY (itemId) REFERENCES Item(id) ON DELETE CASCADE
+);
+
+CREATE INDEX favorite_item_idx ON Favorite(itemId);
+
+selectAll:
+SELECT f.*, i.* 
+FROM Favorite f
+INNER JOIN Item i ON f.itemId = i.id
+ORDER BY f.addedAt DESC;
+
+selectByItemId:
+SELECT * FROM Favorite WHERE itemId = ?;
+
+isFavorite:
+SELECT COUNT(*) > 0 FROM Favorite WHERE itemId = ?;
+
+insert:
+INSERT OR IGNORE INTO Favorite(itemId, addedAt)
+VALUES (?, ?);
+
+delete:
+DELETE FROM Favorite WHERE itemId = ?;
+
+deleteAll:
+DELETE FROM Favorite;

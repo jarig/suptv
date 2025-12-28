@@ -1,0 +1,31 @@
+CREATE TABLE Provider (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    url TEXT NOT NULL,
+    username TEXT,
+    password TEXT,
+    type TEXT NOT NULL DEFAULT 'M3U',
+    epgUrl TEXT,
+    createdAt INTEGER NOT NULL,
+    updatedAt INTEGER DEFAULT 0
+);
+
+selectAll:
+SELECT * FROM Provider;
+
+selectById:
+SELECT * FROM Provider WHERE id = ?;
+
+insert:
+INSERT INTO Provider(name, url, username, password, type, epgUrl, createdAt, updatedAt)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE Provider SET name = ?, url = ?, username = ?, password = ?, type = ?, epgUrl = ?, updatedAt = ?
+WHERE id = ?;
+
+delete:
+DELETE FROM Provider WHERE id = ?;
+
+lastInsertRowId:
+SELECT last_insert_rowid();

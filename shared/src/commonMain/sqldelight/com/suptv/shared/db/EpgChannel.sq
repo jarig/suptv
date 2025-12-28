@@ -1,0 +1,27 @@
+CREATE TABLE EpgChannel (
+    id TEXT PRIMARY KEY,
+    displayName TEXT NOT NULL,
+    icon TEXT,
+    url TEXT
+);
+
+selectAll:
+SELECT * FROM EpgChannel;
+
+selectById:
+SELECT * FROM EpgChannel WHERE id = ?;
+
+insert:
+INSERT OR REPLACE INTO EpgChannel(id, displayName, icon, url)
+VALUES (?, ?, ?, ?);
+
+delete:
+DELETE FROM EpgChannel WHERE id = ?;
+
+deleteAll:
+DELETE FROM EpgChannel;
+
+deleteByProviderId:
+DELETE FROM EpgProgram WHERE channelId IN (
+    SELECT DISTINCT channelId FROM EpgProgram
+);

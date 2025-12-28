@@ -2,6 +2,7 @@ plugins {
     id("com.android.library")
     kotlin("multiplatform")
     kotlin("plugin.serialization")
+    id("app.cash.sqldelight")
 }
 
 kotlin {
@@ -26,12 +27,17 @@ kotlin {
                 
                 // Coroutines
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+                
+                // SQLDelight
+                implementation("app.cash.sqldelight:runtime:2.0.1")
+                implementation("app.cash.sqldelight:coroutines-extensions:2.0.1")
             }
         }
         
         val androidMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-okhttp:2.3.7")
+                implementation("app.cash.sqldelight:android-driver:2.0.1")
             }
         }
     }
@@ -48,5 +54,13 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+sqldelight {
+    databases {
+        create("SupTvDatabase") {
+            packageName.set("com.suptv.shared.db")
+        }
     }
 }

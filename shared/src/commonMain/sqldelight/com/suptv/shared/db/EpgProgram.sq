@@ -1,0 +1,54 @@
+CREATE TABLE EpgProgram (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    channelId TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    startTime INTEGER NOT NULL,
+    endTime INTEGER NOT NULL,
+    category TEXT,
+    icon TEXT,
+    FOREIGN KEY (channelId) REFERENCES EpgChannel(id) ON DELETE CASCADE,
+    UNIQUE(channelId, startTime, endTime)
+);
+
+CREATE INDEX epg_program_channel_idx ON EpgProgram(channelId);
+CREATE INDEX epg_program_time_idx ON EpgProgram(startTime, endTime);
+
+selectAll:
+SELECT * FROM EpgProgram;
+
+selectById:
+SELECT * FROM EpgProgram WHERE id = ?;
+
+selectByChannel:
+SELECT * FROM EpgProgram WHERE channelId = ? ORDER BY startTime;
+
+selectByChannelAndTime:
+SELECT * FROM EpgProgram 
+WHERE channelId = ? AND startTime <= ? AND endTime > ?
+ORDER BY startTime
+LIMIT 1;
+
+selectByChannelAndTimeRange:
+SELECT * FROM EpgProgram 
+WHERE channelId = ? AND startTime < ? AND endTime > ?
+ORDER BY startTime;
+
+insert:
+INSERT OR IGNORE INTO EpgProgram(channelId, title, description, startTime, endTime, category, icon)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+delete:
+DELETE FROM EpgProgram WHERE id = ?;
+
+deleteByChannel:
+DELETE FROM EpgProgram WHERE channelId = ?;
+
+deleteOldPrograms:
+DELETE FROM EpgProgram WHERE endTime < ?;
+
+deleteAll:
+DELETE FROM EpgProgram;
+
+lastInsertRowId:
+SELECT last_insert_rowid();

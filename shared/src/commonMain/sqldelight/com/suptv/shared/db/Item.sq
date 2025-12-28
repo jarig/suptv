@@ -1,0 +1,56 @@
+CREATE TABLE Item (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    providerId INTEGER NOT NULL,
+    categoryId INTEGER,
+    externalId TEXT,
+    name TEXT NOT NULL,
+    logo TEXT,
+    url TEXT NOT NULL,
+    epgId TEXT,
+    type TEXT NOT NULL DEFAULT 'LIVE',
+    sortOrder INTEGER DEFAULT 0,
+    FOREIGN KEY (providerId) REFERENCES Provider(id) ON DELETE CASCADE,
+    FOREIGN KEY (categoryId) REFERENCES Category(id) ON DELETE SET NULL
+);
+
+CREATE INDEX item_provider_idx ON Item(providerId);
+CREATE INDEX item_category_idx ON Item(categoryId);
+CREATE INDEX item_epg_idx ON Item(epgId);
+
+selectAll:
+SELECT * FROM Item;
+
+selectById:
+SELECT * FROM Item WHERE id = ?;
+
+selectByProvider:
+SELECT * FROM Item WHERE providerId = ? ORDER BY sortOrder, name;
+
+selectByCategory:
+SELECT * FROM Item WHERE categoryId = ? ORDER BY sortOrder, name;
+
+selectByEpgId:
+SELECT * FROM Item WHERE epgId = ?;
+
+search:
+SELECT * FROM Item WHERE name LIKE '%' || ? || '%' ORDER BY name LIMIT ?;
+
+insert:
+INSERT INTO Item(providerId, categoryId, externalId, name, logo, url, epgId, type, sortOrder)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE Item SET name = ?, logo = ?, url = ?, epgId = ?, categoryId = ?, sortOrder = ?
+WHERE id = ?;
+
+delete:
+DELETE FROM Item WHERE id = ?;
+
+deleteByProvider:
+DELETE FROM Item WHERE providerId = ?;
+
+deleteByCategory:
+DELETE FROM Item WHERE categoryId = ?;
+
+lastInsertRowId:
+SELECT last_insert_rowid();

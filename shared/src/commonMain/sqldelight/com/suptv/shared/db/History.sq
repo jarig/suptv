@@ -1,0 +1,49 @@
+CREATE TABLE History (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    itemId INTEGER NOT NULL,
+    watchedAt INTEGER NOT NULL,
+    duration INTEGER DEFAULT 0,
+    position INTEGER DEFAULT 0,
+    FOREIGN KEY (itemId) REFERENCES Item(id) ON DELETE CASCADE
+);
+
+CREATE INDEX history_item_idx ON History(itemId);
+CREATE INDEX history_watched_idx ON History(watchedAt DESC);
+
+selectAll:
+SELECT h.*, i.* 
+FROM History h
+INNER JOIN Item i ON h.itemId = i.id
+ORDER BY h.watchedAt DESC;
+
+selectRecent:
+SELECT h.*, i.* 
+FROM History h
+INNER JOIN Item i ON h.itemId = i.id
+ORDER BY h.watchedAt DESC
+LIMIT ?;
+
+selectByItemId:
+SELECT * FROM History WHERE itemId = ? ORDER BY watchedAt DESC LIMIT 1;
+
+insert:
+INSERT INTO History(itemId, watchedAt, duration, position)
+VALUES (?, ?, ?, ?);
+
+updatePosition:
+UPDATE History SET position = ?, duration = ? WHERE id = ?;
+
+delete:
+DELETE FROM History WHERE id = ?;
+
+deleteByItemId:
+DELETE FROM History WHERE itemId = ?;
+
+deleteOldEntries:
+DELETE FROM History WHERE watchedAt < ?;
+
+deleteAll:
+DELETE FROM History;
+
+lastInsertRowId:
+SELECT last_insert_rowid();

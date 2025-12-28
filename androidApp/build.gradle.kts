@@ -24,6 +24,7 @@ kotlin {
                 implementation(compose.foundation)
                 implementation(compose.material3)
                 implementation(compose.materialIconsExtended)
+                implementation(compose.uiTooling)
                 
                 // AndroidX TV libraries
                 // Note: Using alpha versions as stable TV Compose libraries are not yet available
@@ -45,6 +46,11 @@ kotlin {
                 
                 // Coroutines
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+                
+                // Ktor client (needed for ViewModel)
+                implementation("io.ktor:ktor-client-okhttp:2.3.7")
+                implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
             }
         }
     }
