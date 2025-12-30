@@ -154,7 +154,7 @@ class PlaylistViewModel(private val database: SupTvDatabase) : ViewModel() {
     
     fun loadEpgPrograms(epgId: String) {
         viewModelScope.launch {
-            val currentTime = System.currentTimeMillis()
+            val currentTime = java.util.Calendar.getInstance().timeInMillis
             val startOfDay = currentTime
             val endOfDay = currentTime + (36 * 60 * 60 * 1000) // 36 hours from now
             

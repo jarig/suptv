@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -267,7 +268,20 @@ fun CategoriesScreen(
                         )
                     }
                 } else {
+                    val itemsListState = rememberLazyListState()
+                    
+                    // Auto-scroll to selected item when restoring focus
+                    LaunchedEffect(shouldFocusItems, selectedItem?.id) {
+                        if (shouldFocusItems && selectedItem != null) {
+                            val index = items.indexOfFirst { it.id == selectedItem?.id }
+                            if (index >= 0) {
+                                itemsListState.animateScrollToItem(index)
+                            }
+                        }
+                    }
+                    
                     LazyColumn(
+                        state = itemsListState,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(items) { item ->
