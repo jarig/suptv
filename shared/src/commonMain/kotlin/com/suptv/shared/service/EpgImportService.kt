@@ -1,5 +1,6 @@
 package com.suptv.shared.service
 
+import android.util.Log
 import com.suptv.shared.db.SupTvDatabase
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -17,26 +18,30 @@ class EpgImportService(
     
     suspend fun importEpgFromUrl(
         url: String,
-        providerId: Long
+        providerId: Long,
+        onProgress: (progress: Float, message: String) -> Unit = { _, _ -> }
     ): Result<Int> = withContext(Dispatchers.Default) {
         try {
             // Clear old EPG data before importing to avoid duplicates
             println("Clearing old EPG data...")
+            onProgress(0.05f, "Clearing old EPG data...")
             database.epgProgramQueries.deleteAll()
             database.epgChannelQueries.deleteAll()
             
             // Download EPG data with streaming
+            onProgress(0.1f, "Downloading EPG file...")
             val response: HttpResponse = httpClient.get(url)
             
             // Process with streaming decompression - NO memory loading
+            onProgress(0.15f, "Processing EPG data...")
             val count = if (url.endsWith(".gz")) {
                 val reader = downloadAndDecompressGzip(response.bodyAsChannel())
-                val result = parseAndImportXmlTvStreaming(reader, providerId)
+                val result = parseAndImportXmlTvStreaming(reader, providerId, onProgress)
                 reader.close()
                 result
             } else {
                 val xmlContent = response.bodyAsText()
-                parseAndImportXmlTvChunked(xmlContent, providerId)
+                parseAndImportXmlTvChunked(xmlContent, providerId, onProgress)
             }
             
             Result.success(count)
@@ -46,7 +51,11 @@ class EpgImportService(
         }
     }
     
-    private fun parseAndImportXmlTvStreaming(reader: java.io.BufferedReader, providerId: Long): Int {
+    private fun parseAndImportXmlTvStreaming(
+        reader: java.io.BufferedReader, 
+        providerId: Long,
+        onProgress: (progress: Float, message: String) -> Unit = { _, _ -> }
+    ): Int {
         var programCount = 0
         var channelCount = 0
         val channelMap = mutableMapOf<String, Long>()
@@ -60,7 +69,7 @@ class EpgImportService(
         
         val channelBatch = mutableListOf<ChannelData>()
         val programBatch = mutableListOf<ProgramData>()
-        val batchSize = 1000
+        val batchSize = 2000
         
         // State machine for streaming XML parsing
         val buffer = StringBuilder(2048)
@@ -109,7 +118,9 @@ class EpgImportService(
                                                 )
                                             }
                                         }
-                                        println("Inserted ${channelBatch.size} channels (total: $channelCount)...")
+                                        val progress = 0.2f + (channelCount.toFloat() / 100000f) * 0.1f
+                                        onProgress(progress.coerceAtMost(0.3f), "Importing channels: $channelCount")
+                                        // println("Inserted ${channelBatch.size} channels (total: $channelCount)...")
                                         channelBatch.clear()
                                     }
                                 }
@@ -132,8 +143,8 @@ class EpgImportService(
                             try {
                                 val programXml = buffer.toString()
                                 val channelMatch = """channel="([^"]+)"""".toRegex().find(programXml)
-                                val startMatch = """start="(\d+)""".toRegex().find(programXml)
-                                val stopMatch = """stop="(\d+)""".toRegex().find(programXml)
+                                val startMatch = """start="([^"]+)""".toRegex().find(programXml)
+                                val stopMatch = """stop="([^"]+)""".toRegex().find(programXml)
                                 val titleMatch = """<title[^>]*>([^<]+)</title>""".toRegex().find(programXml)
                                 
                                 if (channelMatch != null && startMatch != null && stopMatch != null && titleMatch != null) {
@@ -170,7 +181,9 @@ class EpgImportService(
                                                     )
                                                 }
                                             }
-                                            println("Inserted ${programBatch.size} programs (total: $programCount)...")
+                                            val progress = 0.3f + (programCount.toFloat() / 200000f) * 0.6f
+                                            onProgress(progress.coerceAtMost(0.9f), "Importing programs: $programCount")
+                                            // println("Inserted ${programBatch.size} programs (total: $programCount)...")
                                             programBatch.clear()
                                         }
                                     }
@@ -200,6 +213,7 @@ class EpgImportService(
         }
         
         if (programBatch.isNotEmpty()) {
+            onProgress(0.95f, "Finalizing import...")
             database.transaction {
                 programBatch.forEach { program ->
                     database.epgProgramQueries.insert(
@@ -216,11 +230,16 @@ class EpgImportService(
             println("Inserted final ${programBatch.size} programs")
         }
         
+        onProgress(1.0f, "Import complete!")
         println("EPG import complete: $channelCount channels, $programCount programs")
         return programCount
     }
     
-    private fun parseAndImportXmlTvChunked(xmlContent: String, providerId: Long): Int {
+    private fun parseAndImportXmlTvChunked(
+        xmlContent: String, 
+        providerId: Long,
+        onProgress: (progress: Float, message: String) -> Unit = { _, _ -> }
+    ): Int {
         var programCount = 0
         
         // Process channels first with optimized regex
@@ -254,8 +273,8 @@ class EpgImportService(
             try {
                 // Extract basic attributes
                 val channelMatch = """channel="([^"]+)"""".toRegex().find(chunk)
-                val startMatch = """start="(\d+)""".toRegex().find(chunk)
-                val stopMatch = """stop="(\d+)""".toRegex().find(chunk)
+                val startMatch = """start="([^"]+)""".toRegex().find(chunk)
+                val stopMatch = """stop="([^"]+)""".toRegex().find(chunk)
                 val titleMatch = """<title[^>]*>([^<]+)</title>""".toRegex().find(chunk)
                 
                 if (channelMatch != null && startMatch != null && stopMatch != null && titleMatch != null) {
@@ -301,7 +320,7 @@ class EpgImportService(
     
     private fun parseXmlTvTime(timeStr: String): Long {
         // Format: YYYYMMDDHHmmss +HHMM
-        // Example: 20231227140000 +0000 or 20231227140000 +0200
+        // Example: 20231227140000 +0000 or 20231227140000 +0200 20251228122500 +0300
         try {
             // Extract date/time and timezone parts
             val dateTimePart = timeStr.substring(0, 14)
@@ -328,18 +347,13 @@ class EpgImportService(
             // Adjust for the timezone offset in the EPG data
             // If EPG says "+0200", the time is 2 hours ahead of UTC, so we subtract
             val tzOffsetMillis = tzSign * (tzHours * 3600000L + tzMinutes * 60000L)
+            // Log.i("EpgImportService", "Parsing time string: $timeStr, offset: $tzOffsetMillis, original time: ${calendar.time}")
             val utcTimeMillis = calendar.timeInMillis - tzOffsetMillis
             
             return utcTimeMillis
         } catch (e: Exception) {
             e.printStackTrace()
             return 0
-        }
-    }
-    
-    suspend fun deleteOldPrograms(olderThanTimestamp: Long) {
-        withContext(Dispatchers.Default) {
-            database.epgProgramQueries.deleteOldPrograms(olderThanTimestamp)
         }
     }
 }

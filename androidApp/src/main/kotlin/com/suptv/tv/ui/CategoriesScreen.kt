@@ -48,6 +48,7 @@ fun CategoriesScreen(
     var focusedEpgProgram by remember { mutableStateOf<EpgProgram?>(null) }
     var isRestoringState by remember { mutableStateOf(true) }
     var shouldFocusItems by remember { mutableStateOf(false) }
+    var categoryChangedManually by remember { mutableStateOf(false) }
     
     // Restore focus to items column when returning from player
     LaunchedEffect(restoreFocusToItems) {
@@ -109,17 +110,25 @@ fun CategoriesScreen(
         }
     }
     
-    // Restore last selected item after items are loaded
+    // Restore last selected item after items are loaded OR reset to first item if category changed manually
     LaunchedEffect(items) {
-        if (items.isNotEmpty() && selectedItem == null && isRestoringState) {
-            val lastSelected = preferencesManager.getLastSelectedChannel(provider.id)
-            if (lastSelected != null) {
-                val item = items.find { it.id == lastSelected.itemId }
-                if (item != null) {
-                    selectedItem = item
+        if (items.isNotEmpty()) {
+            if (categoryChangedManually) {
+                // Reset to first item when category is changed manually
+                selectedItem = items.first()
+                shouldFocusItems = true
+                categoryChangedManually = false
+            } else if (selectedItem == null && isRestoringState) {
+                // Restore last selected item only during initial state restoration
+                val lastSelected = preferencesManager.getLastSelectedChannel(provider.id)
+                if (lastSelected != null) {
+                    val item = items.find { it.id == lastSelected.itemId }
+                    if (item != null) {
+                        selectedItem = item
+                    }
                 }
+                isRestoringState = false
             }
-            isRestoringState = false
         }
     }
     
@@ -242,8 +251,11 @@ fun CategoriesScreen(
                                 if (focused) focusedColumn = FocusedColumn.CATEGORIES
                             },
                             onClick = { 
-                                selectedCategory = category
-                                selectedItem = null
+                                if (selectedCategory?.id != category.id) {
+                                    selectedCategory = category
+                                    selectedItem = null
+                                    categoryChangedManually = true
+                                }
                             }
                         )
                     }
@@ -541,7 +553,8 @@ private fun EpgProgramCard(
     onFocusChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
+    val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()).apply { timeZone = TimeZone.getTimeZone("UTC") } }
+    val localTimeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
     val currentTime = System.currentTimeMillis()
     val isNowPlaying = currentTime >= program.startTime && currentTime < program.endTime
     var isFocused by remember { mutableStateOf(false) }
@@ -582,7 +595,7 @@ private fun EpgProgramCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "${timeFormat.format(Date(program.startTime))} - ${timeFormat.format(Date(program.endTime))}",
+                    text = "${localTimeFormat.format(Date(program.startTime))} - ${localTimeFormat.format(Date(program.endTime))}",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isFocused) Color.DarkGray else if (isNowPlaying) Color.White else Color.LightGray
                 )

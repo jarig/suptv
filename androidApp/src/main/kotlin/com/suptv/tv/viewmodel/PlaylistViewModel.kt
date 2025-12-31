@@ -18,7 +18,7 @@ import kotlinx.serialization.json.Json
 
 sealed class ImportState {
     object Idle : ImportState()
-    object Loading : ImportState()
+    data class Loading(val progress: Float = 0f, val message: String = "Loading...") : ImportState()
     data class Success(val providerId: Long, val message: String) : ImportState()
     data class Error(val message: String) : ImportState()
 }
@@ -65,7 +65,7 @@ class PlaylistViewModel(private val database: SupTvDatabase) : ViewModel() {
         password: String? = null
     ) {
         viewModelScope.launch {
-            _importState.value = ImportState.Loading
+            _importState.value = ImportState.Loading()
             
             val result = importService.importFromUrl(url, name, username, password)
             
@@ -83,7 +83,7 @@ class PlaylistViewModel(private val database: SupTvDatabase) : ViewModel() {
     
     fun importPlaylistFromString(content: String, name: String) {
         viewModelScope.launch {
-            _importState.value = ImportState.Loading
+            _importState.value = ImportState.Loading()
             
             val result = importService.importFromString(content, name)
             
@@ -108,7 +108,7 @@ class PlaylistViewModel(private val database: SupTvDatabase) : ViewModel() {
         includeVod: Boolean = false
     ) {
         viewModelScope.launch {
-            _importState.value = ImportState.Loading
+            _importState.value = ImportState.Loading()
             
             val result = xstreamImportService.importXStreamProvider(
                 baseUrl = baseUrl,
@@ -154,7 +154,7 @@ class PlaylistViewModel(private val database: SupTvDatabase) : ViewModel() {
     
     fun loadEpgPrograms(epgId: String) {
         viewModelScope.launch {
-            val currentTime = java.util.Calendar.getInstance().timeInMillis
+            val currentTime = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC")).timeInMillis
             val startOfDay = currentTime
             val endOfDay = currentTime + (36 * 60 * 60 * 1000) // 36 hours from now
             
@@ -209,9 +209,11 @@ class PlaylistViewModel(private val database: SupTvDatabase) : ViewModel() {
     
     fun importEpgFromUrl(url: String, providerId: Long) {
         viewModelScope.launch {
-            _importState.value = ImportState.Loading
+            _importState.value = ImportState.Loading()
             
-            val result = epgImportService.importEpgFromUrl(url, providerId)
+            val result = epgImportService.importEpgFromUrl(url, providerId) { progress, message ->
+                _importState.value = ImportState.Loading(progress, message)
+            }
             
             _importState.value = result.fold(
                 onSuccess = { count ->

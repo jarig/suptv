@@ -58,12 +58,12 @@ kotlin {
 
 android {
     namespace = "com.suptv.tv"
-    compileSdk = 34
+    compileSdk = 35
     
     defaultConfig {
         applicationId = "com.suptv.tv"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
     }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -178,6 +179,50 @@ fun EpgImportScreen(
                     Text("Importing EPG...")
                 } else {
                     Text("Import EPG")
+                }
+            }
+            
+            // Progress indicator
+            if (importState is ImportState.Loading) {
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Surface(
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth(0.7f),
+                    colors = ClickableSurfaceDefaults.colors(
+                        containerColor = Color(0xFF263238),
+                        contentColor = Color.White
+                    ),
+                    shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.medium)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        val loadingState = importState as? ImportState.Loading
+                        if (loadingState != null) {
+                            Text(
+                                text = loadingState.message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White
+                            )
+                            
+                            androidx.compose.material3.LinearProgressIndicator(
+                                progress = loadingState.progress,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(8.dp),
+                                color = Color(0xFF1E88E5),
+                                trackColor = Color(0xFF424242)
+                            )
+                            
+                            Text(
+                                text = "${(loadingState.progress * 100).toInt()}%",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.LightGray
+                            )
+                        }
+                    }
                 }
             }
             
