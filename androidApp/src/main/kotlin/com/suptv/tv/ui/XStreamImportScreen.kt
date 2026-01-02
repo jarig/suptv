@@ -1,5 +1,6 @@
 package com.suptv.tv.ui
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -11,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -292,10 +294,19 @@ private fun TVButton(
         modifier = modifier
             .fillMaxWidth(0.5f)
             .height(56.dp)
-            .onFocusChanged { isFocused = it.isFocused },
+            .onFocusChanged { isFocused = it.isFocused }
+            .pointerInput(Unit) {
+                detectTapGestures {
+                    if (enabled) onClick()
+                }
+            },
         colors = ButtonDefaults.colors(
             containerColor = if (isFocused) Color.White else Color(0xFF1E88E5),
             contentColor = if (isFocused) Color.Black else Color.White
+        ),
+        scale = ButtonDefaults.scale(
+            focusedScale = 1.05f,
+            pressedScale = 0.95f
         )
     ) {
         Text(

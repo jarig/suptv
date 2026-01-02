@@ -87,6 +87,10 @@ fun EpgImportScreen(
                     colors = ButtonDefaults.colors(
                         containerColor = if (backButtonFocused) Color.White else Color.DarkGray,
                         contentColor = if (backButtonFocused) Color.Black else Color.White
+                    ),
+                    scale = ButtonDefaults.scale(
+                        focusedScale = 1.05f,
+                        pressedScale = 0.95f
                     )
                 ) {
                     Text("← Back")
@@ -173,6 +177,10 @@ fun EpgImportScreen(
                     contentColor = if (importButtonFocused) Color.Black else Color.White,
                     disabledContainerColor = Color.DarkGray,
                     disabledContentColor = Color.Gray
+                ),
+                scale = ButtonDefaults.scale(
+                    focusedScale = 1.05f,
+                    pressedScale = 0.95f
                 )
             ) {
                 if (importState is ImportState.Loading) {

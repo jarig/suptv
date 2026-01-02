@@ -1,5 +1,7 @@
 package com.suptv.tv.ui
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -42,27 +44,49 @@ fun ProvidersScreen(
             
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 var m3uButtonFocused by remember { mutableStateOf(false) }
-                Button(
-                    onClick = onAddM3UProvider,
-                    modifier = Modifier.onFocusChanged { m3uButtonFocused = it.isFocused },
-                    colors = ButtonDefaults.colors(
-                        containerColor = if (m3uButtonFocused) Color.White else Color(0xFF4CAF50),
-                        contentColor = if (m3uButtonFocused) Color.Black else Color.White
-                    )
+                Box(
+                    modifier = Modifier.clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { onAddM3UProvider() }
                 ) {
-                    Text("Add M3U")
+                    Button(
+                        onClick = onAddM3UProvider,
+                        modifier = Modifier.onFocusChanged { m3uButtonFocused = it.isFocused },
+                        colors = ButtonDefaults.colors(
+                            containerColor = if (m3uButtonFocused) Color.White else Color(0xFF4CAF50),
+                            contentColor = if (m3uButtonFocused) Color.Black else Color.White
+                        ),
+                        scale = ButtonDefaults.scale(
+                            focusedScale = 1.05f,
+                            pressedScale = 0.95f
+                        )
+                    ) {
+                        Text("Add M3U")
+                    }
                 }
                 
                 var xstreamButtonFocused by remember { mutableStateOf(false) }
-                Button(
-                    onClick = onAddXStreamProvider,
-                    modifier = Modifier.onFocusChanged { xstreamButtonFocused = it.isFocused },
-                    colors = ButtonDefaults.colors(
-                        containerColor = if (xstreamButtonFocused) Color.White else Color(0xFF2196F3),
-                        contentColor = if (xstreamButtonFocused) Color.Black else Color.White
-                    )
+                Box(
+                    modifier = Modifier.clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { onAddXStreamProvider() }
                 ) {
-                    Text("Add XStream")
+                    Button(
+                        onClick = onAddXStreamProvider,
+                        modifier = Modifier.onFocusChanged { xstreamButtonFocused = it.isFocused },
+                        colors = ButtonDefaults.colors(
+                            containerColor = if (xstreamButtonFocused) Color.White else Color(0xFF2196F3),
+                            contentColor = if (xstreamButtonFocused) Color.Black else Color.White
+                        ),
+                        scale = ButtonDefaults.scale(
+                            focusedScale = 1.05f,
+                            pressedScale = 0.95f
+                        )
+                    ) {
+                        Text("Add XStream")
+                    }
                 }
             }
         }
@@ -122,10 +146,15 @@ private fun ProviderItem(
         modifier = modifier
             .fillMaxWidth()
             .height(100.dp)
+            .clickable(onClick = onClick)
             .onFocusChanged { isFocused = it.isFocused },
         colors = ClickableSurfaceDefaults.colors(
             containerColor = if (isFocused) Color(0xFF1E88E5) else Color(0xFF263238),
             contentColor = Color.White
+        ),
+        scale = ClickableSurfaceDefaults.scale(
+            focusedScale = 1.02f,
+            pressedScale = 0.98f
         )
     ) {
         Row(
@@ -158,6 +187,10 @@ private fun ProviderItem(
                     colors = ButtonDefaults.colors(
                         containerColor = if (deleteButtonFocused) Color.White else Color.Red,
                         contentColor = if (deleteButtonFocused) Color.Red else Color.White
+                    ),
+                    scale = ButtonDefaults.scale(
+                        focusedScale = 1.05f,
+                        pressedScale = 0.95f
                     )
                 ) {
                     Text("Delete")

@@ -43,6 +43,8 @@ kotlin {
                 implementation("androidx.media3:media3-exoplayer-hls:1.2.0")
                 implementation("androidx.media3:media3-ui:1.2.0")
                 implementation("androidx.media3:media3-session:1.2.0")
+                implementation("androidx.media3:media3-datasource:1.2.0")
+                implementation("androidx.media3:media3-database:1.2.0")
                 
                 // Coroutines
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
@@ -64,8 +66,8 @@ android {
         applicationId = "com.suptv.tv"
         minSdk = 21
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2"
     }
     
     buildTypes {

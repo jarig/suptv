@@ -1,6 +1,7 @@
 package com.suptv.tv.ui
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -209,6 +210,10 @@ fun CategoriesScreen(
                     colors = ButtonDefaults.colors(
                         containerColor = if (epgButtonFocused) Color.White else Color(0xFF1E88E5),
                         contentColor = if (epgButtonFocused) Color.Black else Color.White
+                    ),
+                    scale = ButtonDefaults.scale(
+                        focusedScale = 1.05f,
+                        pressedScale = 0.95f
                     )
                 ) {
                     Text("📺 Import EPG")
@@ -221,6 +226,10 @@ fun CategoriesScreen(
                     colors = ButtonDefaults.colors(
                         containerColor = if (backButtonFocused) Color.White else Color.DarkGray,
                         contentColor = if (backButtonFocused) Color.Black else Color.White
+                    ),
+                    scale = ButtonDefaults.scale(
+                        focusedScale = 1.05f,
+                        pressedScale = 0.95f
                     )
                 ) {
                     Text("← Back")
@@ -422,6 +431,7 @@ private fun CategoryItem(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
+            .clickable(onClick = onClick)
             .onFocusChanged { 
                 val newFocused = it.isFocused
                 if (isFocused != newFocused) {
@@ -440,7 +450,11 @@ private fun CategoryItem(
                 else -> Color.White
             }
         ),
-        shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.small)
+        shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.small),
+        scale = ClickableSurfaceDefaults.scale(
+            focusedScale = 1.02f,
+            pressedScale = 0.98f
+        )
     ) {
         Box(
             modifier = Modifier
@@ -482,6 +496,7 @@ private fun ItemCard(
             .fillMaxWidth()
             .height(64.dp)
             .then(if (requestFocus) Modifier.focusRequester(focusRequester) else Modifier)
+            .clickable(onClick = onClick)
             .onFocusChanged { focusState ->
                 val newFocused = focusState.isFocused
                 if (isFocused != newFocused) {
@@ -500,7 +515,11 @@ private fun ItemCard(
                 else -> Color.White
             }
         ),
-        shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.small)
+        shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.small),
+        scale = ClickableSurfaceDefaults.scale(
+            focusedScale = 1.02f,
+            pressedScale = 0.98f
+        )
     ) {
         Row(
             modifier = Modifier
@@ -582,7 +601,11 @@ private fun EpgProgramCard(
                 else -> Color.White
             }
         ),
-        shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.small)
+        shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.small),
+        scale = ClickableSurfaceDefaults.scale(
+            focusedScale = 1.02f,
+            pressedScale = 0.98f
+        )
     ) {
         Column(
             modifier = Modifier

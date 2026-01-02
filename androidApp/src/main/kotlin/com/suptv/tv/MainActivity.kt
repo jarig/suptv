@@ -27,6 +27,7 @@ import com.suptv.tv.ui.EpgImportScreen
 import com.suptv.tv.viewmodel.PlaylistViewModel
 import com.suptv.tv.viewmodel.PlayerViewModel
 import com.suptv.tv.util.PreferencesManager
+import com.suptv.tv.player.ImprovedPlayerConfig
 
 class MainActivity : ComponentActivity() {
     
@@ -35,7 +36,7 @@ class MainActivity : ComponentActivity() {
     }
     
     private val exoPlayer by lazy {
-        ExoPlayer.Builder(applicationContext).build()
+        ImprovedPlayerConfig.createOptimizedPlayer(applicationContext)
     }
     
     private val preferencesManager by lazy {
@@ -53,6 +54,7 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         exoPlayer.release()
+        ImprovedPlayerConfig.releaseCache()
     }
     
     override fun onPause() {
@@ -150,7 +152,11 @@ fun SupTVApp(database: com.suptv.shared.db.SupTvDatabase, exoPlayer: ExoPlayer, 
                                 returningFromPlayer = false
                                 currentScreen = Screen.Player
                                 
-                                // Start playback
+                                // Properly stop any existing playback
+                                exoPlayer.stop()
+                                exoPlayer.clearMediaItems()
+                                
+                                // Start new playback
                                 val mediaItem = MediaItem.Builder()
                                     .setUri(item.url)
                                     .setMediaId(item.id.toString())
